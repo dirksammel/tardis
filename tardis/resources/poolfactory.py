@@ -11,6 +11,7 @@ from ..resources.dronestates import RequestState
 from cobald.composite.weighted import WeightedComposite
 from cobald.composite.factory import FactoryPool
 from cobald.decorator.standardiser import Standardiser
+from cobald.decorator.stopper import Stopper
 from cobald.decorator.logger import Logger
 from cobald.utility.primitives import infinity as inf
 
@@ -78,7 +79,11 @@ def create_composite_pool(configuration: str = None) -> WeightedComposite:
             site_composites.append(
                 Logger(
                     Standardiser(
-                        FactoryPool(*check_pointed_drones, factory=drone_factory),
+                        Stopper(
+                            FactoryPool(*check_pointed_drones, factory=drone_factory),
+                            script='/adm/dsadmin/squeue.sh',
+                            interval=300,
+                        ),
                         minimum=cpu_cores,
                     ),
                     name=f"{site.name.lower()}_{machine_type.lower()}",
